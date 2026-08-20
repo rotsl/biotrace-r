@@ -1,0 +1,11 @@
+# BioTrace configuration reference template.
+#
+# This file is what `biotrace::use_biotrace()` writes by default. It is
+# the smallest valid configuration: just `version: 1`. Use it as a
+# starting point for a real project, then consult the upstream
+# documentation at https://github.com/rotsl/biotrace to add files,
+# lineage, claims, figures, reproducibility, labels, comment, and ai
+# sections as appropriate.
+#
+# Schema: https://github.com/rotsl/biotrace/blob/main/schemas/biotrace-config.schema.json
+version: 1

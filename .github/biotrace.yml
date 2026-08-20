@@ -1,0 +1,10 @@
+# Smoke-test configuration for the biotrace R package repository itself.
+#
+# This repository is the R integration package, not a bioinformatics
+# data repository. There is nothing biological to validate here beyond
+# confirming the upstream Action runs end-to-end against the package
+# source. We therefore ship the smallest valid configuration.
+#
+# The matching workflow lives at .github/workflows/biotrace.yml and
+# references the upstream Action as `uses: rotsl/biotrace@v1`.
+version: 1

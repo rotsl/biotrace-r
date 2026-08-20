@@ -1,0 +1,79 @@
+#!/usr/bin/env Rscript
+## biotrace CLI shim.
+##
+## This script is installed by the `biotrace` R package at
+## exec/biotrace. It is a thin wrapper that loads the installed
+## package and dispatches to biotrace:::biotrace_cli(). The shim
+## exists so a user can run `biotrace --help` on PATH without writing
+## any R.
+##
+## The shim deliberately does NOT source development files from the
+## package source tree. It only ever uses the installed package, so a
+## broken source tree cannot break the CLI.
+
+local({
+  trailing <- commandArgs(trailingOnly = TRUE)
+
+  # The shim lives at <libdir>/biotrace/exec/biotrace. Derive the
+  # library path so we can load the package even when the user has
+  # not configured R_LIBS_USER. We do this defensively: if the
+  # derivation fails for any reason, we fall back to the default
+  # search path.
+  shim_path <- tryCatch({
+    args <- commandArgs(trailingOnly = FALSE)
+    file_arg <- args[grep("^--file=", args)]
+    if (length(file_arg) > 0L) {
+      sub("^--file=", "", file_arg[[1L]])
+    } else {
+      # When invoked via a shebang, normalizePath(".") gives the
+      # working directory; the script path is in commandArgs.
+      script <- tryCatch({
+        args2 <- commandArgs(trailingOnly = FALSE)
+        # The first non-flag argument after Rscript is the script path.
+        non_flag <- args2[!grepl("^--", args2)]
+        if (length(non_flag) >= 2L) non_flag[[2L]] else ""
+      }, error = function(e) "")
+      if (nzchar(script)) script else ""
+    }
+  }, error = function(e) "")
+
+  # Derive the library path from the shim's installation location.
+  # exec/biotrace is at <libdir>/biotrace/exec/biotrace, so the
+  # library is two levels up from the exec directory.
+  lib_dir <- tryCatch({
+    if (nzchar(shim_path)) {
+      shim_abs <- normalizePath(shim_path, mustWork = FALSE)
+      # Walk up: exec -> biotrace -> <libdir>
+      exec_dir <- dirname(shim_abs)
+      pkg_dir <- dirname(exec_dir)
+      lib_dir <- dirname(pkg_dir)
+      if (dir.exists(file.path(lib_dir, "biotrace"))) lib_dir else ""
+    } else ""
+  }, error = function(e) "")
+
+  # Make sure the derived library is on the search path. We prepend
+  # rather than replace, so a user-set R_LIBS_USER still wins for
+  # other packages.
+  if (nzchar(lib_dir)) {
+    .libPaths(c(lib_dir, .libPaths()))
+  }
+
+  ok <- tryCatch({
+    suppressPackageStartupMessages({
+      library("biotrace", quietly = TRUE, warn.conflicts = FALSE)
+    })
+    TRUE
+  }, error = function(e) {
+    message("Error: failed to load the 'biotrace' package: ",
+            conditionMessage(e))
+    message("Hint: ensure biotrace is installed. The shim looked in:",
+            paste(" ", c(lib_dir, .libPaths()), collapse = "\n"))
+    FALSE
+  })
+  if (!isTRUE(ok)) {
+    quit(status = 2L)
+  }
+
+  code <- biotrace:::biotrace_cli(trailing)
+  quit(status = as.integer(code))
+})

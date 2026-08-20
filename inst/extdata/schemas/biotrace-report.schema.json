@@ -1,0 +1,132 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "BioTrace Report",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "status",
+    "score",
+    "summary",
+    "findings"
+  ],
+  "properties": {
+    "schema_version": { "type": "string", "const": "1.0" },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "status": { "type": "string", "enum": ["passed", "warning", "error", "info"] },
+    "repository": {
+      "type": "object",
+      "properties": { "owner": { "type": "string" }, "name": { "type": "string" } }
+    },
+    "pull_request": {
+      "type": "object",
+      "properties": {
+        "number": { "type": "integer" },
+        "base_sha": { "type": "string" },
+        "head_sha": { "type": "string" }
+      }
+    },
+    "score": {
+      "type": "object",
+      "required": ["reproducibility"],
+      "properties": {
+        "reproducibility": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "components": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "weight", "result"],
+            "properties": {
+              "name": { "type": "string" },
+              "weight": { "type": "number" },
+              "result": {
+                "type": "string",
+                "enum": ["passed", "failed", "not_applicable"]
+              },
+              "reason": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "files_checked",
+        "claims_checked",
+        "figures_checked",
+        "findings",
+        "blocking_findings"
+      ],
+      "properties": {
+        "files_checked": { "type": "integer" },
+        "claims_checked": { "type": "integer" },
+        "figures_checked": { "type": "integer" },
+        "findings": { "type": "integer" },
+        "blocking_findings": { "type": "integer" }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "module", "severity", "title", "message", "deterministic"],
+        "properties": {
+          "id": { "type": "string" },
+          "module": { "type": "string" },
+          "severity": { "type": "string", "enum": ["info", "warning", "error"] },
+          "title": { "type": "string" },
+          "message": { "type": "string" },
+          "path": { "type": "string" },
+          "startLine": { "type": "integer" },
+          "endLine": { "type": "integer" },
+          "label": { "type": "string" },
+          "deterministic": { "type": "boolean" },
+          "confidence": { "type": "number" },
+          "evidence": { "type": "object" },
+          "remediation": { "type": "string" }
+        }
+      }
+    },
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "status": { "type": "string" },
+          "assertions": { "type": "array" }
+        }
+      }
+    },
+    "lineage": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": { "id": { "type": "string" }, "status": { "type": "string" } }
+      }
+    },
+    "ai": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "status": { "type": "string" },
+        "provider": { "type": "string" },
+        "advisory_only": { "type": "boolean" },
+        "observations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "title": { "type": "string" },
+              "message": { "type": "string" },
+              "confidence": { "type": "number" },
+              "paths": { "type": "array", "items": { "type": "string" } },
+              "requires_human_verification": { "type": "boolean" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,262 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "BioTrace Configuration",
+  "type": "object",
+  "required": ["version"],
+  "properties": {
+    "version": { "type": "integer", "const": 1 },
+    "repository": {
+      "type": "object",
+      "properties": {
+        "languages": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["R", "Python"] }
+        },
+        "organisms": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["scientific_name"],
+            "properties": {
+              "scientific_name": { "type": "string" },
+              "taxonomy_id": { "type": "integer" }
+            }
+          }
+        },
+        "analysis_types": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "files": {
+      "type": "object",
+      "properties": {
+        "metadata": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["path"],
+            "properties": {
+              "path": { "type": "string" },
+              "delimiter": { "type": "string", "enum": ["auto", ",", "\t", ";"] },
+              "id_column": { "type": "string" },
+              "required_columns": { "type": "array", "items": { "type": "string" } },
+              "non_null": { "type": "array", "items": { "type": "string" } },
+              "unique": { "type": "array", "items": { "type": "string" } },
+              "allowed_values": {
+                "type": "object",
+                "additionalProperties": { "type": "array", "items": { "type": "string" } }
+              },
+              "minimum_group_size": {
+                "type": "object",
+                "properties": {
+                  "group_by": { "type": "string" },
+                  "value": { "type": "integer", "minimum": 1 },
+                  "severity": { "type": "string", "enum": ["info", "warning", "error"] }
+                }
+              }
+            }
+          }
+        },
+        "fasta": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["glob"],
+            "properties": {
+              "glob": { "type": "string" },
+              "alphabet": {
+                "type": "string",
+                "enum": ["dna", "rna", "protein", "unrestricted"]
+              },
+              "unique_ids": { "type": "boolean" },
+              "reject_empty_sequences": { "type": "boolean" },
+              "minimum_length": { "type": "integer" },
+              "maximum_length": { "type": "integer" },
+              "loss_threshold": { "type": "number" }
+            }
+          }
+        },
+        "fastq": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["glob"],
+            "properties": {
+              "glob": { "type": "string" },
+              "alphabet": { "type": "string", "enum": ["dna", "rna", "unrestricted"] },
+              "unique_ids": { "type": "boolean" },
+              "reject_empty_sequences": { "type": "boolean" },
+              "maximum_records": { "type": "integer" }
+            }
+          }
+        }
+      }
+    },
+    "lineage": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "inputs", "code", "outputs"],
+        "properties": {
+          "id": { "type": "string" },
+          "inputs": { "type": "array", "items": { "type": "string" } },
+          "code": { "type": "array", "items": { "type": "string" } },
+          "outputs": { "type": "array", "items": { "type": "string" } },
+          "environment": { "type": "array", "items": { "type": "string" } },
+          "claims": { "type": "array", "items": { "type": "string" } },
+          "stale_output_severity": {
+            "type": "string",
+            "enum": ["info", "warning", "error"]
+          },
+          "untraceable_output_severity": {
+            "type": "string",
+            "enum": ["info", "warning", "error"]
+          }
+        }
+      }
+    },
+    "reproducibility": {
+      "type": "object",
+      "properties": {
+        "require_environment": { "type": "boolean" },
+        "require_lockfile": { "type": "boolean" },
+        "entrypoints": { "type": "array", "items": { "type": "string" } },
+        "seed_patterns": { "type": "array", "items": { "type": "string" } },
+        "require_session_info": { "type": "boolean" },
+        "weights": {
+          "type": "object",
+          "properties": {
+            "environment_definition": { "type": "number" },
+            "dependency_lock": { "type": "number" },
+            "dependency_constraints": { "type": "number" },
+            "random_seed": { "type": "number" },
+            "documented_entrypoint": { "type": "number" },
+            "output_manifest": { "type": "number" },
+            "figure_provenance": { "type": "number" },
+            "data_checksums": { "type": "number" },
+            "session_information": { "type": "number" }
+          }
+        }
+      }
+    },
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "source", "evidence", "assertions"],
+        "properties": {
+          "id": { "type": "string" },
+          "source": {
+            "type": "object",
+            "required": ["path"],
+            "properties": { "path": { "type": "string" }, "marker": { "type": "string" } }
+          },
+          "evidence": {
+            "type": "object",
+            "required": ["path"],
+            "properties": {
+              "path": { "type": "string" },
+              "match": { "type": "object", "additionalProperties": { "type": "string" } }
+            }
+          },
+          "assertions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["field", "operator", "value"],
+              "properties": {
+                "field": { "type": "string" },
+                "operator": {
+                  "type": "string",
+                  "enum": ["==", "!=", ">", ">=", "<", "<=", "in", "not_in", "matches"]
+                },
+                "value": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "figures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path"],
+        "properties": {
+          "path": { "type": "string" },
+          "generated_by": { "type": "array", "items": { "type": "string" } },
+          "depends_on": { "type": "array", "items": { "type": "string" } },
+          "caption": {
+            "type": "object",
+            "properties": { "path": { "type": "string" }, "marker": { "type": "string" } }
+          },
+          "require_provenance_sidecar": { "type": "boolean" }
+        }
+      }
+    },
+    "labels": {
+      "type": "object",
+      "properties": {
+        "create": { "type": "boolean" },
+        "prefix": { "type": "string" },
+        "colours": {
+          "type": "object",
+          "properties": {
+            "passed": { "type": "string" },
+            "warning": { "type": "string" },
+            "blocked": { "type": "string" },
+            "informational": { "type": "string" },
+            "ai": { "type": "string" }
+          }
+        }
+      }
+    },
+    "comment": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["update-existing", "create-new", "disabled"]
+        },
+        "include_passed_checks": { "type": "boolean" },
+        "maximum_findings": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "ai": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "string", "enum": ["auto", "true", "false"] },
+        "provider": {
+          "oneOf": [
+            { "type": "string", "enum": ["openai-compatible", "anthropic", "gemini"] },
+            {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["openai-compatible", "anthropic", "gemini"]
+              }
+            }
+          ]
+        },
+        "model": { "type": "string" },
+        "base_url": { "type": "string" },
+        "tasks": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "pr_summary",
+              "method_drift",
+              "claim_candidates",
+              "reviewer_checklist"
+            ]
+          }
+        },
+        "fail_open": { "type": "boolean" },
+        "minimum_confidence": { "type": "number" },
+        "maximum_changed_files": { "type": "integer" },
+        "maximum_patch_bytes": { "type": "integer" },
+        "never_send": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

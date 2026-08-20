@@ -1,0 +1,129 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-08-20T10:30:00Z",
+  "status": "warning",
+  "repository": {
+    "owner": "rotsl",
+    "name": "example-rnaseq"
+  },
+  "pull_request": {
+    "number": 42,
+    "base_sha": "abc1230000000000000000000000000000000000",
+    "head_sha": "def4560000000000000000000000000000000000"
+  },
+  "score": {
+    "reproducibility": 82,
+    "components": [
+      {
+        "name": "environment_definition",
+        "weight": 15,
+        "result": "passed"
+      },
+      {
+        "name": "dependency_lock",
+        "weight": 15,
+        "result": "passed"
+      },
+      {
+        "name": "dependency_constraints",
+        "weight": 10,
+        "result": "passed"
+      },
+      {
+        "name": "random_seed",
+        "weight": 10,
+        "result": "failed",
+        "reason": "No set.seed() call found in analysis/differential_expression.R"
+      },
+      {
+        "name": "documented_entrypoint",
+        "weight": 15,
+        "result": "passed"
+      },
+      {
+        "name": "output_manifest",
+        "weight": 15,
+        "result": "passed"
+      },
+      {
+        "name": "figure_provenance",
+        "weight": 10,
+        "result": "passed"
+      },
+      {
+        "name": "data_checksums",
+        "weight": 5,
+        "result": "passed"
+      },
+      {
+        "name": "session_information",
+        "weight": 5,
+        "result": "not_applicable"
+      }
+    ]
+  },
+  "summary": {
+    "files_checked": 4,
+    "claims_checked": 2,
+    "figures_checked": 3,
+    "findings": 3,
+    "blocking_findings": 0
+  },
+  "findings": [
+    {
+      "id": "stale-output-de-results",
+      "module": "lineage",
+      "severity": "warning",
+      "title": "Possible stale output",
+      "message": "Input data/counts.csv changed but results/de_results.csv did not.",
+      "path": "results/de_results.csv",
+      "label": "results:changed",
+      "deterministic": true,
+      "remediation": "Re-run analysis/differential_expression.R and commit the updated output."
+    },
+    {
+      "id": "figure-stale-figure-2",
+      "module": "figure",
+      "severity": "warning",
+      "title": "Figure may be stale",
+      "message": "Upstream dependency changed since figures/figure_2.png was generated.",
+      "path": "figures/figure_2.png",
+      "label": "figure:stale",
+      "deterministic": true,
+      "remediation": "Regenerate figures/figure_2.png from the current results/de_results.csv."
+    },
+    {
+      "id": "metadata-valid",
+      "module": "files",
+      "severity": "info",
+      "title": "Metadata valid",
+      "message": "data/sample_metadata.csv has 6 rows and 3 columns; all required columns present.",
+      "path": "data/sample_metadata.csv",
+      "label": "metadata:valid",
+      "deterministic": true
+    }
+  ],
+  "claims": [
+    {
+      "id": "il6-treatment-effect",
+      "status": "verified",
+      "assertions": [
+        {"field": "log2FoldChange", "operator": ">=", "value": 1.7, "passed": true},
+        {"field": "padj", "operator": "<", "value": 0.01, "passed": true}
+      ]
+    }
+  ],
+  "lineage": [
+    {
+      "id": "differential-expression",
+      "status": "warning"
+    }
+  ],
+  "ai": {
+    "enabled": false,
+    "status": "disabled",
+    "provider": "",
+    "advisory_only": true,
+    "observations": []
+  }
+}

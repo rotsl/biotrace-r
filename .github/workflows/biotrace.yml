@@ -1,0 +1,44 @@
+# Dogfoods the upstream BioTrace GitHub Action against this repository.
+#
+# `biotrace-r` is an R package, not a GitHub Action repository, so the
+# workflow references the published upstream tag (`rotsl/biotrace@v1`)
+# rather than `uses: ./`. The upstream Action runs end-to-end against
+# the package source on every pull request.
+name: BioTrace
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  checks: write
+
+jobs:
+  biotrace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - id: biotrace
+        uses: rotsl/biotrace@v1
+        with:
+          config: .github/biotrace.yml
+          github-token: ${{ github.token }}
+          fail-on: error
+          ai-enabled: "false"
+
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: biotrace-report
+          path: ${{ steps.biotrace.outputs.report-path }}

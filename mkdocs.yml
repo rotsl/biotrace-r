@@ -1,0 +1,27 @@
+site_name: biotrace
+site_description: R integration for the BioTrace GitHub Action
+site_url: https://rotsl.github.io/biotrace-r/
+repo_url: https://github.com/rotsl/biotrace-r
+repo_name: rotsl/biotrace-r
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+
+nav:
+  - Overview: index.md
+  - R interface: r-interface.md
+  - Command line interface: cli.md
+  - Package metadata: metadata.md
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+
+copyright: Copyright 2026 Rohan R

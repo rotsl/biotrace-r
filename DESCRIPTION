@@ -1,0 +1,42 @@
+Package: biotrace
+Type: Package
+Title: R Integration for the BioTrace GitHub Action
+Version: 0.1.0
+Date: 2026-08-20
+Authors@R: c(
+    person(given = "Rohan",
+           family = "R",
+           role = c("aut", "cre", "cph"),
+           email = "phonics-tiffs1i@icloud.com",
+           comment = c(ORCID = "0009-0005-9225-1775")))
+Description: Tools for configuring, validating, running and inspecting
+    integrations with the BioTrace GitHub Action, which traces
+    biological results from data and code to figures and scientific
+    claims. The package provides an R API, a command-line interface,
+    GitHub workflow scaffolding, configuration helpers and report
+    readers. It does not ship or execute the upstream TypeScript
+    engine; BioTrace runs only through its published GitHub Action
+    (uses: rotsl/biotrace@v1).
+URL: https://rotsl.r-universe.dev/biotrace,
+    https://github.com/rotsl/biotrace-r,
+    https://github.com/rotsl/biotrace
+BugReports: https://github.com/rotsl/biotrace-r/issues
+License: Apache License (>= 2) | file LICENSE
+Encoding: UTF-8
+Depends: R (>= 3.6)
+Imports:
+    fs,
+    jsonlite,
+    rlang,
+    yaml
+Suggests:
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0),
+    withr
+Roxygen: list(markdown = TRUE)
+Config/testthat/edition: 3
+VignetteBuilder: knitr
+SystemRequirements: Rscript on PATH for the installed CLI; no Node.js
+    or TypeScript required to install or use this package.
+Config/roxygen2/version: 8.1.0

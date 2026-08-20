@@ -1,0 +1,117 @@
+# Example BioTrace configuration for an R-based RNA-seq project.
+#
+# This file is shipped as inst/extdata/example-biotrace.yml. It is a
+# realistic but synthetic example. None of the paths it references are
+# present in this repository: it is a shape reference, not a runnable
+# config. validate_biotrace_config() validates the structure against
+# the upstream JSON Schema.
+#
+# Schema reference:
+#   https://github.com/rotsl/biotrace/blob/main/schemas/biotrace-config.schema.json
+version: 1
+
+repository:
+  languages: ["R"]
+  organisms:
+    - scientific_name: "Homo sapiens"
+      taxonomy_id: 9606
+  analysis_types: ["differential-expression", "figure-generation"]
+
+files:
+  metadata:
+    - path: data/sample_metadata.csv
+      delimiter: ","
+      id_column: sample_id
+      required_columns: [sample_id, condition, biological_replicate]
+      non_null: [sample_id, condition]
+      unique: [sample_id]
+      allowed_values:
+        condition: [control, treatment]
+      minimum_group_size:
+        group_by: condition
+        value: 3
+        severity: warning
+  fasta:
+    - glob: "references/**/*.fa"
+      alphabet: dna
+      unique_ids: true
+      reject_empty_sequences: true
+      minimum_length: 50
+      maximum_length: 1000000
+
+lineage:
+  - id: differential-expression
+    inputs: [data/counts.csv, data/sample_metadata.csv]
+    code: [analysis/differential_expression.R]
+    outputs: [results/de_results.csv, figures/figure_2.png]
+    environment: [renv.lock]
+    claims: [manuscript/results.md]
+    stale_output_severity: error
+    untraceable_output_severity: warning
+
+reproducibility:
+  require_environment: true
+  require_lockfile: true
+  entrypoints: ["Rscript analysis/differential_expression.R"]
+  seed_patterns: ["set.seed("]
+  require_session_info: false
+  weights:
+    environment_definition: 15
+    dependency_lock: 15
+    dependency_constraints: 10
+    random_seed: 10
+    documented_entrypoint: 15
+    output_manifest: 15
+    figure_provenance: 10
+    data_checksums: 5
+    session_information: 5
+
+claims:
+  - id: il6-treatment-effect
+    source:
+      path: manuscript/results.md
+      marker: BIOTRACE:il6-treatment-effect
+    evidence:
+      path: results/de_results.csv
+      match:
+        gene: IL6
+    assertions:
+      - field: log2FoldChange
+        operator: ">="
+        value: 1.7
+      - field: padj
+        operator: "<"
+        value: 0.01
+
+figures:
+  - path: figures/figure_2.png
+    generated_by: [analysis/figure_2.R]
+    depends_on: [results/de_results.csv]
+    caption:
+      path: manuscript/figures.md
+      marker: figure-2
+    require_provenance_sidecar: true
+
+labels:
+  create: true
+  prefix: "biotrace:"
+  colours:
+    passed: "0d8a3a"
+    warning: "b76e00"
+    blocked: "b60205"
+    informational: "1f4eda"
+    ai: "5319e7"
+
+comment:
+  mode: update-existing
+  include_passed_checks: true
+  maximum_findings: 50
+
+ai:
+  enabled: "false"
+  provider: openai-compatible
+  fail_open: true
+  minimum_confidence: 0.8
+  maximum_changed_files: 25
+  maximum_patch_bytes: 65536
+  never_send: ["data/raw/**", "**/*.bam"]

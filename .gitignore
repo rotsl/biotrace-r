@@ -1,0 +1,38 @@
+# History / sessions
+.Rhistory
+.Rapp.history
+.RData
+.Ruserdata
+.Rproj.user/
+
+# Test / build artifacts
+*.Rcheck/
+*.tar.gz
+*.tgz
+biotrace_*.tar.gz
+biotrace_*.zip
+LOCAL_CHECKS.txt
+rsconnect/
+tests/testthat/_snaps/
+tests/testthat/_output/
+tests/testthat/_problems/
+*.html
+*.log
+site/
+
+# Local-only development caches
+.covr/
+coverage/
+.lintr_cache/
+*.gcda
+*.gcno
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+*~
+.*.swp
+.vscode/
+.idea/
+.claude/
+.positai/

@@ -1,0 +1,111 @@
+---
+title: "biotrace: R integration for the BioTrace GitHub Action"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{biotrace: R integration for the BioTrace GitHub Action}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Overview
+
+`biotrace` is the R integration package for the [BioTrace](https://github.com/rotsl/biotrace) GitHub Action. BioTrace traces biological results from data and code to figures and scientific claims. It runs as a GitHub Action referenced by `uses: rotsl/biotrace@v1` in a workflow file.
+
+This R package does not ship or run the upstream TypeScript engine. The engine runs only through GitHub. The package provides:
+
+- R helpers to write and validate a BioTrace configuration YAML file
+- R helpers to write the GitHub workflow YAML that calls the upstream Action
+- An R reader for the JSON report BioTrace produces
+- A command-line interface (`biotrace`) that wraps the same R API
+- A conservative GitHub integration helper that can trigger an existing BioTrace workflow
+
+```{r setup}
+library(biotrace)
+```
+
+# Quick start in a fresh project
+
+```{r, eval = FALSE}
+# Initialise .github/biotrace.yml and .github/workflows/biotrace.yml
+use_biotrace()
+```
+
+`use_biotrace()` writes two files and refuses to overwrite them. The workflow file references the upstream Action as `uses: rotsl/biotrace@v1`. To regenerate after editing, pass `overwrite = TRUE`:
+
+```{r, eval = FALSE}
+use_biotrace(overwrite = TRUE)
+```
+
+# Configuration
+
+The smallest valid BioTrace configuration is:
+
+```yaml
+version: 1
+```
+
+```{r}
+default_biotrace_config()
+default_biotrace_config_text()
+```
+
+You can validate any BioTrace configuration file against the upstream JSON Schema (a verbatim copy of the schema published by `rotsl/biotrace` ships under `inst/extdata/schemas/`):
+
+```{r, eval = FALSE}
+validate_biotrace_config(".github/biotrace.yml")
+```
+
+A validation failure produces a structured error pointing at the offending field. Pass `return_errors = TRUE` to collect every violation instead of throwing on the first one.
+
+# Workflows
+
+`biotrace_workflow_text()` returns the workflow YAML as a character vector. It is deterministic and parsable by `yaml::yaml.load()`:
+
+```{r}
+cat(biotrace_workflow_text(), sep = "\n")
+```
+
+# Reports
+
+When BioTrace runs in CI it writes a JSON report. `read_biotrace_report()` reads that file into an S3 object of class `biotrace_report`:
+
+```{r}
+report <- read_biotrace_report(
+  system.file("extdata", "example-report.json", package = "biotrace")
+)
+print(report)
+summary(report)
+```
+
+# GitHub integration
+
+`run_biotrace_github()` is a thin wrapper around the GitHub REST API. It can list workflows, list recent runs of the BioTrace workflow, or dispatch the workflow. It reads a token from `GITHUB_TOKEN` (or `GH_TOKEN`, or any env var you name) and never writes the token to disk.
+
+```{r, eval = FALSE}
+# Preview the request that would be issued, without sending it.
+run_biotrace_github("rotsl/biotrace-r",
+                    action = "trigger",
+                    dry_run = TRUE)
+```
+
+# Command line interface
+
+After installation, the `biotrace` command is available on `PATH`:
+
+```sh
+biotrace --help
+biotrace --version
+biotrace init
+biotrace config validate .github/biotrace.yml
+biotrace report biotrace-report.json
+biotrace github run --repo rotsl/biotrace-r --action trigger --dry-run
+```
+
+The CLI does not provide a `biotrace check` subcommand. There is no local execution of the upstream TypeScript engine in this package, so offering a `check` command would be misleading. The closest equivalent is `biotrace github run`, which talks to GitHub.
